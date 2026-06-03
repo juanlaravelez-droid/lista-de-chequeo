@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Chequeo – Aptitud Empleados en Alturas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+  :root {
+    --amarillo: #F5A623;
+    --naranja: #E8650A;
+    --oscuro: #1A1A2E;
+    --gris: #2D2D44;
+    --claro: #F4F4F8;
+    --verde: #2ECC71;
+    --rojo: #E74C3C;
+    --azul: #3498DB;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--oscuro);
+    color: var(--claro);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--gris) 0%, var(--oscuro) 100%);
+    border-bottom: 3px solid var(--amarillo);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-icon {
+    width: 48px; height: 48px;
+    background: var(--amarillo);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+
+  header h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--amarillo);
+  }
+
+  header p { font-size: 13px; color: #aaa; margin-top: 2px; }
+
+  .main-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  .new-employee-card {
+    background: var(--gris);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 28px;
+    border: 1px solid #3a3a55;
+  }
+
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--amarillo);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    header { padding: 14px 16px; }
+    header h1 { font-size: 15px; }
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--oscuro);
+    border: 1.5px solid #3a3a55;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--claro);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--amarillo);
+  }
+
+  .preguntas-section { margin-bottom: 20px; }
+
+  .preguntas-section h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--naranja);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #3a3a55;
+  }
+
+  .pregunta-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #2a2a3e;
+  }
+
+  .pregunta-row:last-child { border-bottom: none; }
+
+  .pregunta-texto {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #ddd;
+    flex: 1;
+  }
+
+  .opciones {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn-opcion {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #3a3a55;
+    background: transparent;
+    color: #aaa;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Source Sans 3', sans-serif;
+  }
+
+  .btn-opcion:hover { border-color: #666; color: #fff; }
+  .btn-opcion.selected-si { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .btn-opcion.selected-no { background: var(--rojo); border-color: var(--rojo); color: #fff; }
+  .btn-opcion.selected-na { background: var(--azul); border-color: var(--azul); color: #fff; }
+
+  .firma-section { margin-top: 20px; }
+
+  .firma-section h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--naranja);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .firma-canvas-wrap {
+    background: #fff;
+    border-radius: 10px;
+    border: 2px dashed #3a3a55;
+    overflow: hidden;
+  }
+
+  #firmaCanvas {
+    display: block;
+    width: 100%;
+    height: 120px;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .firma-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .btn-limpiar {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #3a3a55;
+    background: transparent;
+    color: #aaa;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-limpiar:hover { border-color: var(--rojo); color: var(--rojo); }
+
+  .btn-agregar {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--amarillo), var(--naranja));
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 8px;
+  }
+
+  .btn-agregar:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-agregar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .empleados-lista { margin-bottom: 28px; }
+
+  .empleados-lista h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--claro);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge {
+    background: var(--amarillo);
+    color: var(--oscuro);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .empleado-card {
+    background: var(--gris);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    border: 1px solid #3a3a55;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .empleado-info strong {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--claro);
+  }
+
+  .empleado-info span {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .empleado-acciones { display: flex; gap: 8px; }
+
+  .btn-ver, .btn-eliminar {
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: opacity 0.2s;
+  }
+
+  .btn-ver { background: var(--azul); color: #fff; }
+  .btn-eliminar { background: #333; color: #aaa; border: 1px solid #444; }
+  .btn-ver:hover, .btn-eliminar:hover { opacity: 0.8; }
+
+  .btn-pdf {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #1a472a, var(--verde));
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .btn-pdf:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(46,204,113,0.3); }
+  .btn-pdf:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--gris);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid #3a3a55;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-header h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--amarillo);
+  }
+
+  .btn-cerrar {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  .modal-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .modal-tabla th {
+    background: var(--oscuro);
+    padding: 8px 10px;
+    text-align: left;
+    color: #aaa;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+
+  .modal-tabla td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #2a2a3e;
+    color: #ddd;
+    vertical-align: top;
+  }
+
+  .chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .chip-si { background: rgba(46,204,113,0.2); color: var(--verde); }
+  .chip-no { background: rgba(231,76,60,0.2); color: var(--rojo); }
+  .chip-na { background: rgba(52,152,219,0.2); color: var(--azul); }
+
+  .firma-preview {
+    margin-top: 16px;
+    background: var(--oscuro);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .firma-preview p { font-size: 12px; color: #aaa; margin-bottom: 8px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #555;
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    color: #fff;
+    max-width: 320px;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .status-bar {
+    background: var(--gris);
+    border: 1px solid #3a3a55;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #aaa;
+  }
+
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--verde);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">⚡</div>
+  <div>
+    <h1>REQUISITOS Y APTITUD – TRABAJO EN ALTURAS</h1>
+    <p>Verificación de condiciones de seguridad para empleados · EPP y EPCC</p>
+  </div>
+</header>
+
+<div class="main-container">
+
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span>Conectado a Google Sheets · Los datos se guardan automáticamente al enviar</span>
+  </div>
+
+  <!-- Formulario -->
+  <div class="new-employee-card">
+    <div class="card-title">👷 Registrar Empleado</div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="inp-nombre" placeholder="Ej. Carlos Andrés López">
+      </div>
+      <div class="form-group">
+        <label>Documento de identidad</label>
+        <input type="text" id="inp-cedula" placeholder="Ej. 1023456789">
+      </div>
+      <div class="form-group">
+        <label>Cargo</label>
+        <input type="text" id="inp-cargo" placeholder="Ej. Técnico Electricista">
+      </div>
+      <div class="form-group">
+        <label>Fecha de verificación</label>
+        <input type="date" id="inp-fecha">
+      </div>
+    </div>
+
+    <div id="preguntas-container"></div>
+
+    <div class="firma-section">
+      <h3>✍️ Firma del Empleado</h3>
+      <div class="firma-canvas-wrap">
+        <canvas id="firmaCanvas" width="800" height="120"></canvas>
+      </div>
+      <div class="firma-actions">
+        <button class="btn-limpiar" onclick="limpiarFirma()">🗑 Limpiar firma</button>
+      </div>
+    </div>
+
+    <button class="btn-agregar" id="btn-enviar" onclick="agregarEmpleado()">
+      ＋ Guardar y Enviar a Google Sheets
+    </button>
+  </div>
+
+  <!-- Lista local -->
+  <div class="empleados-lista">
+    <h2>Registros de esta sesión <span class="badge" id="contador">0</span></h2>
+    <div id="lista-empleados">
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <p>Aún no hay empleados registrados en esta sesión.</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-pdf" id="btn-pdf" onclick="generarPDF()" disabled>
+    📄 Descargar PDF de esta sesión
+  </button>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="cerrarModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-titulo">Detalle Empleado</h3>
+      <button class="btn-cerrar" onclick="document.getElementById('modal').classList.remove('active')">×</button>
+    </div>
+    <div id="modal-contenido"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCAGo20pzDRh8TdhgBFoOGix2ns_8xDjTW7HberhgMlNzaQXcH9fQLJZW1zx-JXokvLg/exec';
+
+const PREGUNTAS = [
+  { grupo: "Verificación de Seguridad Social", items: [
+    "Verificación de la afiliación vigente a la seguridad social",
+    "Curso de alturas vigente",
+    "Exámenes Ap. Alturas vigente, puede realizar trabajos en alturas",
+    "Consciente del día – hora – actividad",
+    "Conoce el procedimiento y se siente capaz de ejecutarlo",
+  ]},
+  { grupo: "Estado Físico y Condiciones de Salud", items: [
+    "Los empleados han recibido instrucciones y precauciones a seguir en la realización de la tarea",
+    "He comido alimentos en las últimas 4 horas",
+    "Dormí 6 horas como mínimo la noche anterior",
+    "Se retiró cadenas, relojes, pulseras u otros accesorios",
+    "Afirma no estar consumiendo actualmente medicamentos que afecten sus condiciones",
+    "Se encuentra en buen estado de salud y condiciones físicas aptas",
+    "Asegura usted no sufrir de epilepsia, mareos o vértigo",
+    "Certifica usted no sufrir de miedo a las alturas (acrofobia)",
+  ]},
+  { grupo: "Documentación y Procedimientos", items: [
+    "Se divulgó el Procedimiento de trabajo seguro en charla preoperacional",
+    "Fue comunicado el plan de rescate de alturas a los empleados",
+    "El trabajador es consciente de los riesgos a los cuales está expuesto",
+  ]},
+  { grupo: "Área y Herramientas", items: [
+    "Demarcación del área de trabajo",
+    "Se diligencia ATS de la actividad a desarrollar",
+    "Inspección visual antes del uso EPP y EPCC",
+    "Cuerdas de trabajo en buen estado",
+    "Porta herramientas en buen estado",
+    "Condición atmosférica (viento, lluvia, etc.) adecuada",
+    "Control de caída de materiales",
+    "Existe interferencia con otro tipo de trabajos",
+    "Bajo estado de ánimo",
+    "Mareos dos días antes",
+    "¿Ingirió licor o sustancias psicoactivas en las últimas 24 horas?",
+  ]},
+];
+
+let empleados = [];
+let respuestasActuales = {};
+
+function renderPreguntas() {
+  const c = document.getElementById('preguntas-container');
+  let html = '';
+  let idx = 0;
+  PREGUNTAS.forEach(grupo => {
+    html += `<div class="preguntas-section"><h3>${grupo.grupo}</h3>`;
+    grupo.items.forEach(p => {
+      const key = `p${idx}`;
+      respuestasActuales[key] = null;
+      html += `
+        <div class="pregunta-row">
+          <span class="pregunta-texto">${p}</span>
+          <div class="opciones">
+            <button class="btn-opcion" data-key="${key}" data-val="SI" onclick="seleccionar(this)">SI</button>
+            <button class="btn-opcion" data-key="${key}" data-val="NO" onclick="seleccionar(this)">NO</button>
+            <button class="btn-opcion" data-key="${key}" data-val="NA" onclick="seleccionar(this)">N/A</button>
+          </div>
+        </div>`;
+      idx++;
+    });
+    html += `</div>`;
+  });
+  c.innerHTML = html;
+}
+
+function seleccionar(btn) {
+  const key = btn.dataset.key;
+  const val = btn.dataset.val;
+  document.querySelectorAll(`[data-key="${key}"]`).forEach(b => {
+    b.classList.remove('selected-si','selected-no','selected-na');
+  });
+  btn.classList.add(`selected-${val.toLowerCase()}`);
+  respuestasActuales[key] = val;
+}
+
+// Firma
+const canvas = document.getElementById('firmaCanvas');
+const ctx = canvas.getContext('2d');
+let dibujando = false;
+let firmaVacia = true;
+ctx.strokeStyle = '#1a1a2e';
+ctx.lineWidth = 2;
+ctx.lineCap = 'round';
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const src = e.touches ? e.touches[0] : e;
+  return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+}
+
+canvas.addEventListener('mousedown', e => { dibujando = true; firmaVacia = false; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', e => { if (!dibujando) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+canvas.addEventListener('mouseup', () => dibujando = false);
+canvas.addEventListener('mouseleave', () => dibujando = false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); dibujando = true; firmaVacia = false; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!dibujando) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+canvas.addEventListener('touchend', () => dibujando = false);
+
+function limpiarFirma() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  firmaVacia = true;
+}
+
+async function agregarEmpleado() {
+  const nombre = document.getElementById('inp-nombre').value.trim();
+  const cedula = document.getElementById('inp-cedula').value.trim();
+  const cargo  = document.getElementById('inp-cargo').value.trim();
+  const fecha  = document.getElementById('inp-fecha').value;
+
+  if (!nombre || !cedula || !cargo || !fecha) {
+    mostrarToast('⚠️ Complete todos los datos del empleado', '#E67E22');
+    return;
+  }
+
+  const firmaData = firmaVacia ? null : canvas.toDataURL('image/png');
+
+  const respuestas = [];
+  let idx = 0;
+  PREGUNTAS.forEach(grupo => {
+    grupo.items.forEach(p => {
+      respuestas.push({ grupo: grupo.grupo, pregunta: p, respuesta: respuestasActuales[`p${idx}`] || '—' });
+      idx++;
+    });
+  });
+
+  const payload = { nombre, cedula, cargo, fecha, respuestas, firma: firmaData };
+
+  // Deshabilitar botón mientras envía
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando a Google Sheets...';
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    // no-cors no retorna respuesta legible, pero si no hay error el envío fue exitoso
+    empleados.push({ ...payload, id: Date.now() });
+    renderLista();
+    resetFormulario();
+    mostrarToast(`✅ ${nombre} guardado en Google Sheets`);
+    document.getElementById('btn-pdf').disabled = false;
+  } catch(err) {
+    mostrarToast('❌ Error al enviar. Revisa la conexión.', '#E74C3C');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '＋ Guardar y Enviar a Google Sheets';
+  }
+}
+
+function resetFormulario() {
+  document.getElementById('inp-nombre').value = '';
+  document.getElementById('inp-cedula').value = '';
+  document.getElementById('inp-cargo').value = '';
+  document.getElementById('inp-fecha').value = '';
+  respuestasActuales = {};
+  renderPreguntas();
+  limpiarFirma();
+}
+
+function renderLista() {
+  const c = document.getElementById('lista-empleados');
+  document.getElementById('contador').textContent = empleados.length;
+  if (!empleados.length) {
+    c.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Aún no hay empleados registrados en esta sesión.</p></div>';
+    return;
+  }
+  c.innerHTML = empleados.map((e, i) => `
+    <div class="empleado-card">
+      <div class="empleado-info">
+        <strong>${e.nombre}</strong>
+        <span>CC: ${e.cedula} · ${e.cargo} · ${e.fecha}</span>
+      </div>
+      <div class="empleado-acciones">
+        <button class="btn-ver" onclick="verDetalle(${i})">Ver</button>
+        <button class="btn-eliminar" onclick="eliminar(${i})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function eliminar(i) {
+  empleados.splice(i, 1);
+  renderLista();
+  if (!empleados.length) document.getElementById('btn-pdf').disabled = true;
+}
+
+function verDetalle(i) {
+  const e = empleados[i];
+  document.getElementById('modal-titulo').textContent = e.nombre;
+  let html = `<p style="font-size:13px;color:#aaa;margin-bottom:16px">CC: ${e.cedula} · ${e.cargo} · ${e.fecha}</p>`;
+  html += `<table class="modal-tabla"><thead><tr><th>Pregunta</th><th>Resp.</th></tr></thead><tbody>`;
+  e.respuestas.forEach(r => {
+    const cls = r.respuesta === 'SI' ? 'chip-si' : r.respuesta === 'NO' ? 'chip-no' : 'chip-na';
+    html += `<tr><td>${r.pregunta}</td><td><span class="chip ${cls}">${r.respuesta}</span></td></tr>`;
+  });
+  html += `</tbody></table>`;
+  if (e.firma) html += `<div class="firma-preview"><p>Firma:</p><img src="${e.firma}" style="height:80px;border-radius:4px"></div>`;
+  document.getElementById('modal-contenido').innerHTML = html;
+  document.getElementById('modal').classList.add('active');
+}
+
+function cerrarModal(e) {
+  if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('active');
+}
+
+async function generarPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, M = 14;
+  const anchoUtil = W - M * 2;
+
+  for (let ei = 0; ei < empleados.length; ei++) {
+    if (ei > 0) doc.addPage();
+    const e = empleados[ei];
+
+    doc.setFillColor(26, 26, 46);
+    doc.rect(0, 0, W, 28, 'F');
+    doc.setFillColor(245, 166, 35);
+    doc.rect(0, 26, W, 2, 'F');
+    doc.setTextColor(245, 166, 35);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text('REQUISITOS Y APTITUD DE LOS EMPLEADOS', M, 12);
+    doc.setTextColor(180, 180, 180);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Verificación de condiciones de seguridad – EPP y EPCC', M, 19);
+
+    let y = 36;
+    doc.setFillColor(45, 45, 68);
+    doc.roundedRect(M, y, anchoUtil, 22, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text(e.nombre, M + 6, y + 8);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(180, 180, 180);
+    doc.text(`CC: ${e.cedula}   ·   Cargo: ${e.cargo}   ·   Fecha: ${e.fecha}`, M + 6, y + 16);
+    y += 28;
+
+    let grupoActual = '';
+    e.respuestas.forEach(r => {
+      if (y > 255) { doc.addPage(); y = 20; }
+      if (r.grupo !== grupoActual) {
+        grupoActual = r.grupo;
+        doc.setFillColor(232, 101, 10);
+        doc.rect(M, y, anchoUtil, 6, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text(grupoActual.toUpperCase(), M + 3, y + 4.2);
+        y += 8;
+      }
+      const resp = r.respuesta;
+      let fillR = 52, fillG = 152, fillB = 219;
+      if (resp === 'SI') { fillR=46; fillG=204; fillB=113; }
+      else if (resp === 'NO') { fillR=231; fillG=76; fillB=60; }
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(50, 50, 50);
+      const textoLineas = doc.splitTextToSize(r.pregunta, anchoUtil - 25);
+      const altReal = Math.max(7, textoLineas.length * 4.5 + 3);
+      if (y + altReal > 270) { doc.addPage(); y = 20; }
+
+      doc.setFillColor(248, 248, 252);
+      doc.rect(M, y, anchoUtil, altReal, 'F');
+      doc.setDrawColor(220,220,230);
+      doc.rect(M, y, anchoUtil, altReal, 'S');
+      doc.text(textoLineas, M + 3, y + 4.5);
+
+      const chipW = 14, chipH = 5, chipX = M + anchoUtil - chipW - 3, chipY = y + (altReal - chipH) / 2;
+      doc.setFillColor(fillR, fillG, fillB);
+      doc.roundedRect(chipX, chipY, chipW, chipH, 1, 1, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.text(resp, chipX + chipW/2, chipY + 3.5, { align: 'center' });
+      y += altReal;
+    });
+
+    y += 6;
+    if (y > 250) { doc.addPage(); y = 20; }
+    doc.setTextColor(100,100,100);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9);
+    doc.text('FIRMA DEL EMPLEADO:', M, y);
+    y += 4;
+
+    if (e.firma) {
+      try { doc.addImage(e.firma, 'PNG', M, y, 60, 20); y += 24; }
+      catch(err) { doc.setDrawColor(180,180,180); doc.rect(M, y, 60, 20); y += 24; }
+    } else {
+      doc.setDrawColor(180,180,180);
+      doc.rect(M, y, 80, 18);
+      doc.setTextColor(180,180,180);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8);
+      doc.text('Sin firma registrada', M + 3, y + 10);
+      y += 22;
+    }
+
+    doc.setDrawColor(100,100,100);
+    doc.line(M, y, M + 80, y);
+    doc.setTextColor(100,100,100);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8);
+    doc.text(e.nombre, M, y + 4);
+
+    doc.setFillColor(26, 26, 46);
+    doc.rect(0, 285, W, 12, 'F');
+    doc.setTextColor(120,120,120);
+    doc.setFontSize(7);
+    doc.text(`Empleado ${ei+1} de ${empleados.length}  ·  Generado: ${new Date().toLocaleString('es-CO')}`, W/2, 292, { align:'center' });
+  }
+
+  doc.save(`Lista_Chequeo_Alturas_${new Date().toISOString().slice(0,10)}.pdf`);
+  mostrarToast('📄 PDF generado correctamente');
+}
+
+function mostrarToast(msg, color = '#2ECC71') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+renderPreguntas();
+document.getElementById('inp-fecha').valueAsDate = new Date();
+</script>
+</body>
+</html>
